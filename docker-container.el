@@ -114,16 +114,18 @@ displayed values in the column."
 
 (defun docker-container-description-with-stats ()
   "Return the containers stats string."
-  (let* ((inhibit-message t)
-         (up (length (docker-container-entries "--filter status=running")))
-         (down (length (docker-container-entries "--filter status=exited")))
-         (all (length (docker-container-entries "--all")))
-         (other (- all up down)))
-    (format "Containers (%s total, %s up, %s down, %s other)"
-            all
-            (propertize (number-to-string up) 'face 'docker-face-status-up)
-            (propertize (number-to-string down) 'face 'docker-face-status-down)
-            (propertize (number-to-string other) 'face 'docker-face-status-other))))
+  (condition-case nil
+      (let* ((inhibit-message t)
+             (up (length (docker-container-entries "--filter status=running")))
+             (down (length (docker-container-entries "--filter status=exited")))
+             (all (length (docker-container-entries "--all")))
+             (other (- all up down)))
+        (format "Containers (%s total, %s up, %s down, %s other)"
+                all
+                (propertize (number-to-string up) 'face 'docker-face-status-up)
+                (propertize (number-to-string down) 'face 'docker-face-status-down)
+                (propertize (number-to-string other) 'face 'docker-face-status-other)))
+    (error (format  "Containers (error reading stats)"))))
 
 (defun docker-container-refresh ()
   "Refresh the containers list."

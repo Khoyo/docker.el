@@ -145,12 +145,14 @@ The result is the tabulated list id for an entry is propertized with
 
 (defun docker-image-description-with-stats ()
   "Return the images stats string."
-  (let* ((inhibit-message t)
-         (entries (docker-image-entries-propertized))
-         (dangling (-filter (-compose #'docker-image-dangling-p 'car) entries)))
-    (format "Images (%s total, %s dangling)"
-            (length entries)
-            (propertize (number-to-string (length dangling)) 'face 'docker-face-dangling))))
+  (condition-case nil
+      (let* ((inhibit-message t)
+             (entries (docker-image-entries-propertized))
+             (dangling (-filter (-compose #'docker-image-dangling-p 'car) entries)))
+        (format "Images (%s total, %s dangling)"
+                (length entries)
+                (propertize (number-to-string (length dangling)) 'face 'docker-face-dangling)))
+      (error (format "Images (error reading stats)"))))
 
 (defun docker-image-refresh ()
   "Refresh the images list."

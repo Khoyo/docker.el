@@ -108,12 +108,14 @@ The result is the tabulated list id for an entry is propertized with
 
 (defun docker-network-description-with-stats ()
   "Return the networks stats string."
-  (let* ((inhibit-message t)
-         (entries (docker-network-entries-propertized))
-         (dangling (-filter (-compose #'docker-network-dangling-p 'car) entries)))
-    (format "Networks (%s total, %s dangling)"
-            (length entries)
-            (propertize (number-to-string (length dangling)) 'face 'docker-face-dangling))))
+  (condition-case nil
+      (let* ((inhibit-message t)
+             (entries (docker-network-entries-propertized))
+             (dangling (-filter (-compose #'docker-network-dangling-p 'car) entries)))
+        (format "Networks (%s total, %s dangling)"
+                (length entries)
+                (propertize (number-to-string (length dangling)) 'face 'docker-face-dangling)))
+    (error (format "Networks (error reading stats)"))))
 
 (defun docker-network-refresh ()
   "Refresh the networks list."

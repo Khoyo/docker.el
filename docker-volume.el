@@ -106,12 +106,14 @@ The result is the tabulated list id for an entry is propertized with
 
 (defun docker-volume-description-with-stats ()
   "Return the volumes stats string."
-  (let* ((inhibit-message t)
-         (entries (docker-volume-entries-propertized))
-         (dangling (-filter (-compose #'docker-volume-dangling-p 'car) entries)))
-    (format "Volumes (%s total, %s dangling)"
-            (length entries)
-            (propertize (number-to-string (length dangling)) 'face 'docker-face-dangling))))
+  (condition-case nil
+      (let* ((inhibit-message t)
+             (entries (docker-volume-entries-propertized))
+             (dangling (-filter (-compose #'docker-volume-dangling-p 'car) entries)))
+        (format "Volumes (%s total, %s dangling)"
+                (length entries)
+                (propertize (number-to-string (length dangling)) 'face 'docker-face-dangling)))
+    (error (format "Volumes (error reading stats)"))))
 
 (defun docker-volume-refresh ()
   "Refresh the volumes list."
