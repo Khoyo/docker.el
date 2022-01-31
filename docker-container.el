@@ -113,24 +113,22 @@ displayed values in the column."
     (-map (-partial #'docker-utils-parse docker-container-columns) lines)))
 
 (defun docker-container-fetch-status-async ()
-   "Write the status to `docker-status-strings'."
-   (docker-run-async
-    (list "container" "ls" "--all" "--format={{ .State }}")
-    (lambda (data-buffer)
-      (let* ((inhibit-message t)
-             (lines (with-current-buffer data-buffer (s-split "\n" (buffer-string) t)))
-             (up (seq-count (-partial #'equal "running") lines))
-             (down (seq-count (-partial #'equal "exited") lines))
-             (all (length lines))
-             (other (- all up down)))
-        (push `(container . ,(format "%s total, %s up, %s down, %s other"
-                                     all
-                                     (propertize (number-to-string up) 'face 'docker-face-status-up)
-                                     (propertize (number-to-string down) 'face 'docker-face-status-down)
-                                     (propertize (number-to-string other) 'face 'docker-face-status-other)))
-              docker-status-strings)
-        (kill-buffer data-buffer)
-        (transient--redisplay)))))
+  "Write the status to `docker-status-strings'."
+  (docker-run-async '("container" "ls" "--all" "--format={{.State}}")
+                    (lambda (text)
+                      (let* ((inhibit-message t)
+                             (lines (s-split "\n" text t))
+                             (up (seq-count (-partial #'equal "running") lines))
+                             (down (seq-count (-partial #'equal "exited") lines))
+                             (all (length lines))
+                             (other (- all up down)))
+                        (push `(container . ,(format "%s total, %s up, %s down, %s other"
+                                                     all
+                                                     (propertize (number-to-string up) 'face 'docker-face-status-up)
+                                                     (propertize (number-to-string down) 'face 'docker-face-status-down)
+                                                     (propertize (number-to-string other) 'face 'docker-face-status-other)))
+                              docker-status-strings)
+                        (transient--redisplay)))))
 
 (add-hook 'docker-open-hook #'docker-container-fetch-status-async)
 
@@ -221,14 +219,14 @@ nil, ask the user for it."
   (interactive "sContainer path: \nFHost path: ")
   (docker-utils-ensure-items)
   (--each (docker-utils-get-marked-items-ids)
-    (docker-run-async (list "cp" (concat it ":" container-path) host-path))))
+    (docker-run-async '("cp" (concat it ":" container-path) host-path))))
 
 (defun docker-container-cp-to-selection (host-path container-path)
   "Run \"docker cp\" from HOST-PATH to CONTAINER-PATH for selected containers."
   (interactive "fHost path: \nsContainer path: ")
   (docker-utils-ensure-items)
   (--each (docker-utils-get-marked-items-ids)
-    (docker-run-async (list "cp" host-path (concat it ":" container-path)))))
+    (docker-run-async '("cp" host-path (concat it ":" container-path)))))
 
 (defun docker-container-eshell-selection ()
   "Run `docker-container-eshell' on the containers selection."

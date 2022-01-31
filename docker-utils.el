@@ -87,21 +87,15 @@ Execute BODY in a buffer named with the help of NAME."
   (interactive (list (docker-utils-get-transient-action)
                      (transient-args transient-current-command)))
   (--each (docker-utils-get-marked-items-ids)
-    (let ((calling-buffer (current-buffer)))
-      (docker-run-async (list (s-split " " action) args (list it))
-                        (lambda (data-buffer)
-                          (with-current-buffer calling-buffer (tablist-revert))
-                          (kill-buffer data-buffer))))))
+    (docker-run-async (list (s-split " " action) args (list it))
+                      (lambda (text) (tablist-revert)))))
 
 (defun docker-utils-generic-action-async-with-multiple-ids (action args)
   "As for `docker-utils-generic-action-async', but group selection ids into a single command."
   (interactive (list (docker-utils-get-transient-action)
                      (transient-args transient-current-command)))
-  (let ((calling-buffer (current-buffer)))
-    (docker-run-async (list (s-split " " action) args (docker-utils-get-marked-items-ids))
-                      (lambda (data-buffer)
-                        (with-current-buffer calling-buffer (tablist-revert))
-                        (kill-buffer data-buffer)))))
+  (docker-run-async (list (s-split " " action) args (docker-utils-get-marked-items-ids))
+                    (lambda (text) (tablist-revert))))
 
 (defun docker-utils-pop-to-buffer (name)
   "Like `pop-to-buffer', but suffix NAME with the host if on a remote host."

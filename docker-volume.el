@@ -106,22 +106,18 @@ The result is the tabulated list id for an entry is propertized with
 
 (defun docker-volume-fetch-status-async ()
   "Write the status to `docker-status-strings'."
-  (docker-run-async
-    '("volume" "ls" "-q" "--filter=\ dangling=true")
-    (lambda (data-buffer)
-      (let* ((dangling (with-current-buffer data-buffer (length (s-split "\n" (buffer-string) t)))))
-        (kill-buffer data-buffer)
-        ;; now it gets crazy...
-        (docker-run-async
-         '("volume" "ls" "-q")
-         (lambda (data-buffer)
-           (let* ((all (with-current-buffer data-buffer (length (s-split "\n" (buffer-string) t)))))
-             (push `(volume . ,(format "%s total, %s dangling"
-                                      (number-to-string all)
-                                      (propertize (number-to-string dangling) 'face 'docker-face-dangling)))
-                   docker-status-strings)
-             (kill-buffer data-buffer)
-             (transient--redisplay))))))))
+  (docker-run-async '("volume" "ls" "-q" "--filter=dangling=true")
+                    (lambda (text)
+                      (let* ((dangling (length (s-split "\n" text t))))
+                        ;; now it gets crazy...
+                        (docker-run-async '("volume" "ls" "-q")
+                                          (lambda (text)
+                                            (let* ((all (length (s-split "\n" text t))))
+                                              (push `(volume . ,(format "%s total, %s dangling"
+                                                                        (number-to-string all)
+                                                                        (propertize (number-to-string dangling) 'face 'docker-face-dangling)))
+                                                    docker-status-strings)
+                                              (transient--redisplay))))))))
 
 (add-hook 'docker-open-hook #'docker-volume-fetch-status-async)
 

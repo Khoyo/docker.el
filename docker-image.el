@@ -145,19 +145,16 @@ The result is the tabulated list id for an entry is propertized with
 
 (defun docker-image-fetch-status-async ()
   "Write the status to `docker-status-strings'."
-  (docker-run-async
-   ;; According to CLI source code an image is dangling if this outputs "<none><none>"
-    (list "image" "ls" "--format={{ .Tag }}{{ .Digest }}")
-    (lambda (data-buffer)
-      (let* ((lines (with-current-buffer data-buffer (s-split "\n" (buffer-string) t)))
-             (dangling (seq-count (-partial #'equal "<none><none>") lines))
-             (total (length lines)))
-        (push `(image . ,(format "%s total, %s dangling"
-                (number-to-string total)
-                (propertize (number-to-string dangling) 'face 'docker-face-dangling)))
-              docker-status-strings)
-        (kill-buffer data-buffer)
-        (transient--redisplay)))))
+  (docker-run-async '("image" "ls" "--format={{.Tag}}{{.Digest}}")
+                    (lambda (text)
+                      (let* ((lines (s-split "\n" text t))
+                             (dangling (seq-count (-partial #'equal "<none><none>") lines))
+                             (total (length lines)))
+                        (push `(image . ,(format "%s total, %s dangling"
+                                                 (number-to-string total)
+                                                 (propertize (number-to-string dangling) 'face 'docker-face-dangling)))
+                              docker-status-strings)
+                        (transient--redisplay)))))
 
 (add-hook 'docker-open-hook #'docker-image-fetch-status-async)
 
@@ -173,24 +170,17 @@ The result is the tabulated list id for an entry is propertized with
 (defun docker-image-pull-one (name &optional all)
   "Pull the image named NAME.  If ALL is set, use \"-a\"."
   (interactive (list (docker-image-read-name) current-prefix-arg))
-  (let ((calling-buffer (current-buffer)))
-    ;; Note docker-utils-generic-action-async runs all marked lines by default
-    (docker-run-async (list "pull" (when all "-a") name)
-                      (lambda (data-buffer)
-                        (with-current-buffer calling-buffer (tablist-revert)
-                                             (kill-buffer data-buffer))))))
+  (docker-run-async '("pull" (when all "-a") name)
+                    (lambda (text) (tablist-revert))))
 
 (defun docker-image-run-selection (command)
   "Run \"docker image run\" with COMMAND on the images selection."
   (interactive "sCommand: ")
   (docker-utils-ensure-items)
   (--each (docker-utils-get-marked-items-ids)
-    (let ((calling-buffer (current-buffer)))
-      ;; Can't use generic-action as 'command' must be the last arg not 'it'
-      (docker-run-async (list "run" (transient-args 'docker-image-run) it command)
-                        (lambda (data-buffer)
-                          (with-current-buffer calling-buffer (tablist-revert))
-                          (kill-buffer data-buffer))))))
+    ;; Can't use generic-action as 'command' must be the last arg not 'it'
+    (docker-run-async '("run" (transient-args 'docker-image-run) it command)
+                      (lambda (text) (tablist-revert)))))
 
 (defun docker-image-tag-selection ()
   "Tag images."
