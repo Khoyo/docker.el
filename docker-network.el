@@ -121,8 +121,6 @@ The result is the tabulated list id for an entry is propertized with
                                                     docker-status-strings)
                                               (transient--redisplay))))))))
 
-(add-hook 'docker-open-hook #'docker-network-fetch-status-async)
-
 (defun docker-network-refresh ()
   "Refresh the networks list."
   (setq tabulated-list-entries (docker-network-entries-propertized (docker-network-ls-arguments))))

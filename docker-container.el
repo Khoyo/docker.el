@@ -130,8 +130,6 @@ displayed values in the column."
                               docker-status-strings)
                         (transient--redisplay)))))
 
-(add-hook 'docker-open-hook #'docker-container-fetch-status-async)
-
 (defun docker-container-refresh ()
   "Refresh the containers list."
   (setq tabulated-list-entries (docker-container-entries (docker-container-ls-arguments))))

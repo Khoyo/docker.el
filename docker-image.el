@@ -156,8 +156,6 @@ The result is the tabulated list id for an entry is propertized with
                               docker-status-strings)
                         (transient--redisplay)))))
 
-(add-hook 'docker-open-hook #'docker-image-fetch-status-async)
-
 (defun docker-image-refresh ()
   "Refresh the images list."
   (setq tabulated-list-entries (docker-image-entries-propertized (docker-image-ls-arguments))))

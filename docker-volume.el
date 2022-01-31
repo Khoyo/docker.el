@@ -119,8 +119,6 @@ The result is the tabulated list id for an entry is propertized with
                                                     docker-status-strings)
                                               (transient--redisplay))))))))
 
-(add-hook 'docker-open-hook #'docker-volume-fetch-status-async)
-
 (defun docker-volume-refresh ()
   "Refresh the volumes list."
   (setq tabulated-list-entries (docker-volume-entries-propertized (docker-volume-ls-arguments))))
