@@ -72,7 +72,7 @@ Execute BODY in a buffer named with the help of NAME."
   (interactive (list (docker-utils-get-transient-action)
                      (transient-args transient-current-command)))
   (--each (docker-utils-get-marked-items-ids)
-    (docker-run-docker action args it))
+    (docker-run action args it))
   (tablist-revert))
 
 (defun docker-utils-generic-action-with-buffer (action args)
@@ -120,7 +120,7 @@ Execute BODY in a buffer named with the help of NAME."
   (interactive)
   (let ((entry-id (tabulated-list-get-id)))
     (docker-utils-with-buffer (format "inspect %s" entry-id)
-      (insert (docker-run-docker "inspect" () entry-id))
+      (insert (docker-run "inspect" () entry-id))
       (js-mode)
       (view-mode))))
 

@@ -82,7 +82,7 @@ displayed values in the column."
 (defun docker-network-entries (&optional args)
   "Return the docker networks data for `tabulated-list-entries'."
   (let* ((fmt (docker-utils-make-format-string docker-network-id-template docker-network-columns))
-         (data (docker-run-docker "network ls" args (format "--format=\"%s\"" fmt)))
+         (data (docker-run "network ls" args (format "--format=\"%s\"" fmt)))
          (lines (s-split "\n" data t)))
     (-map (-partial #'docker-utils-parse docker-network-columns) lines)))
 

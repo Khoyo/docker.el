@@ -64,7 +64,7 @@ Wrap the function `shell-command-to-string', ensuring variable `shell-file-name'
                            "/bin/sh")))
     (shell-command-to-string command)))
 
-(defun docker-run-docker (&rest args)
+(defun docker-run (&rest args)
   "Execute \"`docker-command' ARGS\" and return the results."
   (docker-with-sudo
     (let* ((flat-args (-remove 's-blank? (-flatten (list (docker-arguments) args))))

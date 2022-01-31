@@ -108,7 +108,7 @@ displayed values in the column."
 (defun docker-container-entries (&optional args)
   "Return the docker containers data for `tabulated-list-entries'."
   (let* ((fmt (docker-utils-make-format-string docker-container-id-template docker-container-columns))
-         (data (docker-run-docker "container ls" args (format "--format=\"%s\"" fmt)))
+         (data (docker-run "container ls" args (format "--format=\"%s\"" fmt)))
          (lines (s-split "\n" data t)))
     (-map (-partial #'docker-utils-parse docker-container-columns) lines)))
 
@@ -206,7 +206,7 @@ nil, ask the user for it."
                         (if prefix
                             (format "%s|" (s-chop-suffix ":" prefix))
                           "/")))
-         (container-config (cdr (assq 'Config (aref (json-read-from-string (docker-run-docker "inspect" container)) 0))))
+         (container-config (cdr (assq 'Config (aref (json-read-from-string (docker-run "inspect" container)) 0))))
          (container-workdir (cdr (assq 'WorkingDir container-config)))
          (container-env (cdr (assq 'Env container-config)))
          (default-directory (format "%s%s%s" file-prefix container-address container-workdir))
@@ -254,7 +254,7 @@ nil, ask the user for it."
   (interactive)
   (docker-utils-ensure-items)
   (--each (docker-utils-get-marked-items-ids)
-    (docker-run-docker "rename" it (read-string (format "Rename \"%s\" to: " it))))
+    (docker-run "rename" it (read-string (format "Rename \"%s\" to: " it))))
   (tablist-revert))
 
 (defun docker-container-shell-selection (prefix)
