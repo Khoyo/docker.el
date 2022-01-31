@@ -80,7 +80,7 @@ displayed values in the column."
 (defun docker-volume-entries (&optional args)
   "Return the docker volumes data for `tabulated-list-entries'."
   (let* ((fmt (docker-utils-make-format-string docker-volume-id-template docker-volume-columns))
-         (data (docker-run "volume ls" args (format "--format=\"%s\"" fmt)))
+         (data (docker-run "volume" "ls" args (format "--format=\"%s\"" fmt)))
          (lines (s-split "\n" data t)))
     (-map (-partial #'docker-utils-parse docker-volume-columns) lines)))
 

@@ -108,7 +108,7 @@ displayed values in the column."
 (defun docker-container-entries (&optional args)
   "Return the docker containers data for `tabulated-list-entries'."
   (let* ((fmt (docker-utils-make-format-string docker-container-id-template docker-container-columns))
-         (data (docker-run "container ls" args (format "--format=\"%s\"" fmt)))
+         (data (docker-run "container" "ls" args (format "--format=\"%s\"" fmt)))
          (lines (s-split "\n" data t)))
     (-map (-partial #'docker-utils-parse docker-container-columns) lines)))
 

@@ -119,7 +119,7 @@ be the list (repository tag id).  See `docker-image-id-template'."
 (defun docker-image-entries (&optional args)
   "Return the docker images data for `tabulated-list-entries'."
   (let* ((fmt (docker-utils-make-format-string docker-image-id-template docker-image-columns))
-         (data (docker-run "image ls" args (format "--format=\"%s\"" fmt)))
+         (data (docker-run "image" "ls" args (format "--format=\"%s\"" fmt)))
          (lines (s-split "\n" data t)))
     (--map (docker-image-make-id (docker-utils-parse docker-image-columns it)) lines)))
 
